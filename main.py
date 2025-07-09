@@ -41,16 +41,26 @@ def selecionarBD(event):
     except mysql.connector.Error as erro:
         print(f"Não foi possível estabelecer uma ligação. Erro: '{erro}'")
 
-#Interface                   
+#Interface          
 root = Tk()
-
 root.title("Projeto UFCD 10790")
-root.geometry('200x200')
+root.resizable(False, False)
+
+larguraEcra = root.winfo_screenwidth()
+alturaEcra = root.winfo_screenheight()
+larguraJanela = 130
+alturaJanela = 94
+centerX = (larguraEcra - larguraJanela) // 2
+centerY = (alturaEcra - alturaJanela) // 2
+root.geometry(f'{larguraJanela}x{alturaJanela}+{centerX}+{centerY}')
+
+frameBD = Frame(root, padx = 2, pady = 2)
+frameBD.pack()
 
 textoBD = Label(root, text = "Selecione uma lista:")
-textoBD.pack()
+textoBD.pack(anchor=NW)
 
-listaBD = Listbox(root)
+listaBD = Listbox(root, width = 20, height = 4)
 listaBD.insert(0, "Jogos")
 listaBD.insert(1, "Filmes")
 listaBD.insert(2, "Series")
