@@ -14,8 +14,9 @@ class MenuPrincipal(tk.Tk):
         centerX = (larguraEcra - larguraJanela) // 2
         centerY = (alturaEcra - alturaJanela) // 2
         self.geometry(f'{larguraJanela}x{alturaJanela}+{centerX}+{centerY}')
-        self.grid_columnconfigure(1, weight = 1)
-        self.grid_rowconfigure(1, weight = 1)  
+        self.grid_columnconfigure(1, weight = 1, minsize = 300)
+        self.grid_columnconfigure(2, weight = 1, minsize = 300)
+        self.grid_rowconfigure(1, weight = 1, minsize = 150)  
 
         #Bases de Dados
         frameBD = tk.Frame(self)
@@ -33,7 +34,7 @@ class MenuPrincipal(tk.Tk):
         
         #Botões
         frameBotoes = tk.Frame(self)
-        frameBotoes.grid(row = 2, column = 0, sticky = "sw", pady = (0, 5))
+        frameBotoes.grid(row = 1, column = 0, sticky = "n", padx = 1, pady = (10, 0))
 
         botaoRegistar = tk.Button(frameBotoes, text = "Registar", width = 14, height = 3)
         botaoRegistar.pack(anchor = tk.W, padx = 4, pady = 2)
@@ -48,13 +49,24 @@ class MenuPrincipal(tk.Tk):
         
         #Barra de pesquisa
         framePesquisa = tk.Frame(self)
-        framePesquisa.grid(row = 0, column = 2, sticky = "ne", padx = 10, pady = (5, 0))
+        framePesquisa.grid(row = 0, column = 2, sticky = "ne", padx = (5, 10), pady = (5, 0))
         
         textoPesquisa = tk.Label(framePesquisa, text = "Pesquisar:")
         textoPesquisa.pack(side = tk.LEFT)
 
         barraPesquisa = tk.Entry(framePesquisa, width = 30)
         barraPesquisa.pack(side = tk.LEFT)
+        
+        #Lista de items
+        frameItems = tk.Frame(self)
+        frameItems.grid(row = 0, column = 1, rowspan= 2, columnspan = 2, sticky = "nsew", padx = 5, pady = (35, 10))
+        
+        scrollbarItems = tk.Scrollbar(frameItems)
+        scrollbarItems.pack(side = tk.RIGHT, fill = tk.Y)
+
+        listaItems = tk.Listbox(frameItems, width = 80, height = 15, yscrollcommand = scrollbarItems.set)
+        listaItems.pack(fill = tk.BOTH, expand = True)
+        scrollbarItems.config(command = listaItems.yview)
 
     def selecionarBD(self, event):
         print("Base de dados selecionada")
