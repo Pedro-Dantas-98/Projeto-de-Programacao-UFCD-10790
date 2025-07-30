@@ -1,9 +1,11 @@
 import tkinter as tk
+from baseDados import BaseDados
 
 class MenuPrincipal(tk.Tk):
     def __init__(self):
         super().__init__()
         self.selecaoBD = None
+        self.bd = None
         
         #Janela
         self.title("Projeto UFCD 10790")
@@ -16,14 +18,16 @@ class MenuPrincipal(tk.Tk):
         centerY = (alturaEcra - alturaJanela) // 2
         self.geometry(f'{larguraJanela}x{alturaJanela}+{centerX}+{centerY}')
         
+        #Função de UI do menu principal
         self.uiMenuPrincipal()
         
     def uiMenuPrincipal(self):
+        #Configurar a grid
         self.grid_columnconfigure(1, weight = 1, minsize = 300)
         self.grid_columnconfigure(2, weight = 1, minsize = 300)
         self.grid_rowconfigure(1, weight = 1, minsize = 150)  
 
-        #Bases de Dados
+        #UI Bases de Dados
         frameBD = tk.Frame(self)
         frameBD.grid(row = 0, column = 0, sticky = "nw", padx = 2, pady = (4, 0))
         
@@ -37,7 +41,7 @@ class MenuPrincipal(tk.Tk):
         self.listaBD.bind('<<ListboxSelect>>', self.selecionarBD)
         self.listaBD.pack(anchor = tk.NW, padx = 2, pady = 2)
         
-        #Botões
+        #UI Botões
         frameBotoes = tk.Frame(self)
         frameBotoes.grid(row = 1, column = 0, sticky = "n", padx = 1, pady = (10, 0))
 
@@ -52,7 +56,7 @@ class MenuPrincipal(tk.Tk):
         botaoBackup = tk.Button(frameBotoes, text = "Backup", width = 14, height = 3)
         botaoBackup.pack(anchor = tk.W, padx = 4, pady = 2)
         
-        #Barra de pesquisa
+        #UI Barra de pesquisa
         framePesquisa = tk.Frame(self)
         framePesquisa.grid(row = 0, column = 2, sticky = "ne", padx = (5, 10), pady = (5, 0))
         
@@ -62,7 +66,7 @@ class MenuPrincipal(tk.Tk):
         barraPesquisa = tk.Entry(framePesquisa, width = 30)
         barraPesquisa.pack(side = tk.LEFT)
         
-        #Lista de items
+        #UI Lista de items
         frameItems = tk.Frame(self)
         frameItems.grid(row = 0, column = 1, rowspan= 2, columnspan = 2, sticky = "nsew", padx = 5, pady = (35, 10))
         
@@ -78,6 +82,7 @@ class MenuPrincipal(tk.Tk):
         self.selecionarBD(None)
 
     def selecionarBD(self, event):
+        #Escolher a base de dados selecionada na lista
         selecionado = self.listaBD.curselection()
         
         if not selecionado:
@@ -86,12 +91,26 @@ class MenuPrincipal(tk.Tk):
         basesDados = ['jogos', 'filmes', 'series']
         self.selecaoBD = basesDados[selecionado[0]]
         self.title(f"Projeto UFCD 10790 - {self.selecaoBD.capitalize()}")
+        
+        if self.bd:
+            self.bd.fecharLigacao()
+
+        self.bd = BaseDados(self.selecaoBD)
+        
+        #Correr a função de aceder aos items presentes na base de dados selecionada
         self.acederItemsBD()
     
     def acederItemsBD(self):
+        #Apagar os items presentes na listbox e puxar os items presentes na base de dados
         self.listaItems.delete(0, tk.END)
-        self.listaItems.insert(tk.END, f"Exemplo 1 - {self.selecaoBD}")
-        self.listaItems.insert(tk.END, f"Exemplo 2 - {self.selecaoBD}")
+        
+        itemsBD = self.bd.puxarItems()
+        
+        if not itemsBD:
+            self.listaItems.insert(tk.END, f"(Não existem items na base de dados {self.selecaoBD})")
+        else:
+            for itemID, nomeItem in itemsBD:
+                self.listaItems.insert(tk.END, f"{itemID}: {nomeItem}")
         
     def registarItem(self):
         print("Abrir sub-menu para registar novo item.")
