@@ -3,6 +3,7 @@ from tkinter import messagebox
 from baseDados import BaseDados
 from uiRegistarItem import MenuRegistarItem
 from uiEditarItem import MenuEditarItem
+from uiBackup import MenuBackup
 
 class MenuPrincipal(tk.Tk):
     def __init__(self):
@@ -49,7 +50,7 @@ class MenuPrincipal(tk.Tk):
         botaoEliminar.pack(anchor = tk.W, padx = 4, pady = 2)
         botaoEstatistica = tk.Button(frameBotoes, text = "Estatísticas", width = 14, height = 3)
         botaoEstatistica.pack(anchor = tk.W, padx = 4, pady = 2)
-        botaoBackup = tk.Button(frameBotoes, text = "Backup", width = 14, height = 3)
+        botaoBackup = tk.Button(frameBotoes, text = "Backup", command = self.gerirBackup, width = 14, height = 3)
         botaoBackup.pack(anchor = tk.W, padx = 4, pady = 2)
         
         #UI Barra de pesquisa
@@ -113,9 +114,11 @@ class MenuPrincipal(tk.Tk):
                 self.listaItems.insert(tk.END, f"{itemID}: {nomeItem}")
         
     def registarItem(self):
+        #Abrir o sub-menu de registar items
         MenuRegistarItem(self, self.selecaoBD, self.bd, self.acederItemsBD)
 
     def editarItem(self):
+        #Obter o ID do item selecionado
         selecionadoItem = self.listaItems.curselection()
         if not selecionadoItem:
             messagebox.showwarning("Aviso", "É necessário selecionar um item para editar.")
@@ -129,9 +132,11 @@ class MenuPrincipal(tk.Tk):
             messagebox.showerror(f"Erro: {e}", f"Não foi possível obter o ID do item.")
             return
         
+        #Abrir o sub-menu de editar items
         MenuEditarItem(self, self.selecaoBD, self.bd, itemID, self.acederItemsBD)
 
     def eliminarItem(self):
+        #Obter o ID do item selecionado
         selecionadoItem = self.listaItems.curselection()
         if not selecionadoItem:
             messagebox.showwarning("Aviso", "É necessário selecionar um item para eliminar.")
@@ -145,12 +150,13 @@ class MenuPrincipal(tk.Tk):
             messagebox.showerror(f"Erro: {e}", f"Não foi possível obter o ID do item.")
             return
 
+        #Confirmar a eliminação do item selecionado
         confirmarEliminar = messagebox.askyesno("Confirmar Eliminação", f"Tem a certeza que quer eliminar o item {itemTexto}?")
         
         if confirmarEliminar:
             try:
-                self.bd.cursor.execute("DELETE FROM items WHERE id = ?", (itemID,))
-                self.bd.ligacao.commit()
+                self.bd.cursor.execute("DELETE FROM items WHERE id = ?", (itemID,)) # type: ignore
+                self.bd.ligacao.commit() # type: ignore
                 self.acederItemsBD()
                 messagebox.showinfo("Item Eliminado", f"O item foi eliminado da lista {self.selecaoBD}.")
             except Exception as e:
@@ -159,8 +165,8 @@ class MenuPrincipal(tk.Tk):
     def verEstatisticas(self):
         print("Abrir sub-janela com estatísticas.")
 
-    def criarBackup(self):
-        print("Criar cópia de segurança da base de dados atual.")
+    def gerirBackup(self):
+        MenuBackup(self, self.selecaoBD, self.bd, self.acederItemsBD)
 
 def configurarJanela(self, larguraJanela: int, alturaJanela: int):
     self.resizable(False, False)
