@@ -101,11 +101,15 @@ class MenuPrincipal(tk.Tk):
         self.acederItemsBD()
     
     def acederItemsBD(self):
+        #Verificação para evitar erro
+        if self.bd is None:
+            return 
+        
         #Apagar os items presentes na listbox e puxar os items presentes na base de dados
         self.listaItems.delete(0, tk.END)
-        
         itemsBD = self.bd.puxarItems()
         
+        #Verificar se a base de dados tem items
         if not itemsBD:
             self.listaItems.insert(tk.END, f"(Não existem items na base de dados {self.selecaoBD})")
         else:
