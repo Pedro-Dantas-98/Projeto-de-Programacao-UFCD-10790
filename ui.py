@@ -3,6 +3,7 @@ import tkinter as tk
 class MenuPrincipal(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.selecaoBD = None
         
         #Janela
         self.title("Projeto UFCD 10790")
@@ -14,6 +15,10 @@ class MenuPrincipal(tk.Tk):
         centerX = (larguraEcra - larguraJanela) // 2
         centerY = (alturaEcra - alturaJanela) // 2
         self.geometry(f'{larguraJanela}x{alturaJanela}+{centerX}+{centerY}')
+        
+        self.uiMenuPrincipal()
+        
+    def uiMenuPrincipal(self):
         self.grid_columnconfigure(1, weight = 1, minsize = 300)
         self.grid_columnconfigure(2, weight = 1, minsize = 300)
         self.grid_rowconfigure(1, weight = 1, minsize = 150)  
@@ -25,12 +30,12 @@ class MenuPrincipal(tk.Tk):
         textoBD = tk.Label(frameBD, text = "Selecione uma lista:")
         textoBD.pack(anchor = tk.NW)
         
-        listaBD = tk.Listbox(frameBD, width = 17, height = 3)
-        listaBD.insert(0, " Jogos")
-        listaBD.insert(1, " Filmes")
-        listaBD.insert(2, " Series")
-        listaBD.bind('<Double-1>', self.selecionarBD)
-        listaBD.pack(anchor = tk.NW, padx = 2, pady = 2)
+        self.listaBD = tk.Listbox(frameBD, width = 17, height = 3)
+        self.listaBD.insert(0, " Jogos")
+        self.listaBD.insert(1, " Filmes")
+        self.listaBD.insert(2, " Series")
+        self.listaBD.bind('<<ListboxSelect>>', self.selecionarBD)
+        self.listaBD.pack(anchor = tk.NW, padx = 2, pady = 2)
         
         #Botões
         frameBotoes = tk.Frame(self)
@@ -64,10 +69,42 @@ class MenuPrincipal(tk.Tk):
         scrollbarItems = tk.Scrollbar(frameItems)
         scrollbarItems.pack(side = tk.RIGHT, fill = tk.Y)
 
-        listaItems = tk.Listbox(frameItems, width = 80, height = 15, yscrollcommand = scrollbarItems.set)
-        listaItems.pack(fill = tk.BOTH, expand = True)
-        scrollbarItems.config(command = listaItems.yview)
+        self.listaItems = tk.Listbox(frameItems, width = 80, height = 15, yscrollcommand = scrollbarItems.set)
+        self.listaItems.pack(fill = tk.BOTH, expand = True)
+        scrollbarItems.config(command = self.listaItems.yview)
+        
+        #Selecionar BD inicial
+        self.listaBD.select_set(0)
+        self.selecionarBD(None)
 
     def selecionarBD(self, event):
-        print("Base de dados selecionada")
+        selecionado = self.listaBD.curselection()
+        
+        if not selecionado:
+            return
+        
+        basesDados = ['jogos', 'filmes', 'series']
+        self.selecaoBD = basesDados[selecionado[0]]
+        self.title(f"Projeto UFCD 10790 - {self.selecaoBD.capitalize()}")
+        self.acederItemsBD()
+    
+    def acederItemsBD(self):
+        self.listaItems.delete(0, tk.END)
+        self.listaItems.insert(tk.END, f"Exemplo 1 - {self.selecaoBD}")
+        self.listaItems.insert(tk.END, f"Exemplo 2 - {self.selecaoBD}")
+        
+    def registarItem(self):
+        print("Abrir sub-menu para registar novo item.")
+
+    def editarItem(self):
+        print("Abrir sub-menu para editar item selecionado.")
+
+    def visualizarItem(self):
+        print("Abrir sub-menu para ver detalhes do item.")
+
+    def verEstatisticas(self):
+        print("Abrir sub-janela com estatísticas.")
+
+    def criarBackup(self):
+        print("Criar cópia de segurança da base de dados atual.")
         
