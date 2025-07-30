@@ -45,7 +45,7 @@ class MenuPrincipal(tk.Tk):
         botaoRegistar.pack(anchor = tk.W, padx = 4, pady = 2)
         botaoEditar = tk.Button(frameBotoes, text = "Editar", command = self.editarItem, width = 14, height = 3)
         botaoEditar.pack(anchor = tk.W, padx = 4, pady = 2)
-        botaoEliminar = tk.Button(frameBotoes, text = "Eliminar", width = 14, height = 3)
+        botaoEliminar = tk.Button(frameBotoes, text = "Eliminar", command = self.eliminarItem, width = 14, height = 3)
         botaoEliminar.pack(anchor = tk.W, padx = 4, pady = 2)
         botaoEstatistica = tk.Button(frameBotoes, text = "Estatísticas", width = 14, height = 3)
         botaoEstatistica.pack(anchor = tk.W, padx = 4, pady = 2)
@@ -118,17 +118,43 @@ class MenuPrincipal(tk.Tk):
     def editarItem(self):
         selecionadoItem = self.listaItems.curselection()
         if not selecionadoItem:
-            print("Não selecionou um item.")
             messagebox.showwarning("Aviso", "É necessário selecionar um item para editar.")
             return
         
         itemTexto = self.listaItems.get(selecionadoItem[0])
-        itemID = int(itemTexto.split(":")[0])
+        
+        try:
+            itemID = int(itemTexto.split(":")[0])
+        except Exception as e:
+            messagebox.showerror(f"Erro: {e}", f"Não foi possível obter o ID do item.")
+            return
         
         MenuEditarItem(self, self.selecaoBD, self.bd, itemID, self.acederItemsBD)
 
     def eliminarItem(self):
-        print("Abrir sub-menu para ver detalhes do item.")
+        selecionadoItem = self.listaItems.curselection()
+        if not selecionadoItem:
+            messagebox.showwarning("Aviso", "É necessário selecionar um item para eliminar.")
+            return
+
+        itemTexto = self.listaItems.get(selecionadoItem[0])
+        
+        try:
+            itemID = int(itemTexto.split(":")[0])
+        except Exception as e:
+            messagebox.showerror(f"Erro: {e}", f"Não foi possível obter o ID do item.")
+            return
+
+        confirmarEliminar = messagebox.askyesno("Confirmar Eliminação", f"Tem a certeza que quer eliminar o item {itemTexto}?")
+        
+        if confirmarEliminar:
+            try:
+                self.bd.cursor.execute("DELETE FROM items WHERE id = ?", (itemID,))
+                self.bd.ligacao.commit()
+                self.acederItemsBD()
+                messagebox.showinfo("Item Eliminado", f"O item foi eliminado da lista {self.selecaoBD}.")
+            except Exception as e:
+                messagebox.showerror(f"Erro: {e}", f"Não foi possível eliminar o item.")
 
     def verEstatisticas(self):
         print("Abrir sub-janela com estatísticas.")

@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 class MenuEditarItem(tk.Toplevel):
     def __init__(self, parent, selecaoBD, bd, itemID, atualizarLista):
@@ -120,12 +121,14 @@ class MenuEditarItem(tk.Toplevel):
                     
                 self.bd.ligacao.commit()
                 print("O item foi atualizado.")
+                messagebox.showinfo("Item Atualizado", f"O item da lista {self.selecaoBD} foi atualizado.")
                 
                 #Fechar o sub-menu e atualizar a lista de items
                 self.destroy()
                 self.atualizarLista()
             except Exception as e:
                 print(f"Não foi possível guardar os dados. Erro: {e}")
+                messagebox.showerror(f"Erro: {e}", f"Não foi possível guardar os dados.")
     
         #UI Botões Sub-Menu Registar
         botaoGuardar = tk.Button(self, text = "Guardar", command = guardarDados)
