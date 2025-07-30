@@ -63,6 +63,11 @@ class BaseDados:
         #Função de puxar os items todos da base de dados selecionada
         self.cursor.execute("SELECT id, titulo FROM items")
         return self.cursor.fetchall()
+    
+    def puxarItemSelecionado(self, id: int):
+        #Função de puxar um item especifico baseado no seu ID
+        self.cursor.execute("SELECT * FROM items WHERE id = ?", (id,))
+        return self.cursor.fetchone()
 
     def fecharLigacao(self):
         #Fechar a ligação à base de dados
