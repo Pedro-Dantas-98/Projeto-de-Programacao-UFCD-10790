@@ -68,6 +68,15 @@ class BaseDados:
         #Função de puxar um item especifico baseado no seu ID
         self.cursor.execute("SELECT * FROM items WHERE id = ?", (id,))
         return self.cursor.fetchone()
+    
+    def pesquisarItemNome(self, termo):
+        #Função que seleciona o item que corresponde ao termo de pesquisa
+        termo_like = f"%{termo}%"
+        self.cursor.execute("""
+            SELECT id, titulo FROM items
+            WHERE titulo LIKE ?
+        """, (termo_like,))
+        return self.cursor.fetchall()
 
     def fecharLigacao(self):
         #Fechar a ligação à base de dados

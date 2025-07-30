@@ -60,8 +60,9 @@ class MenuPrincipal(tk.Tk):
         textoPesquisa = tk.Label(framePesquisa, text = "Pesquisar:")
         textoPesquisa.pack(side = tk.LEFT)
 
-        barraPesquisa = tk.Entry(framePesquisa, width = 30)
-        barraPesquisa.pack(side = tk.LEFT)
+        self.barraPesquisa = tk.Entry(framePesquisa, width = 30)
+        self.barraPesquisa.pack(side = tk.LEFT)
+        self.barraPesquisa.bind("<Return>", lambda event: self.pesquisarItem())
         
         #UI Lista de items
         frameItems = tk.Frame(self)
@@ -166,9 +167,38 @@ class MenuPrincipal(tk.Tk):
         print("Abrir sub-janela com estatísticas.")
 
     def gerirBackup(self):
+        #Abrir o sub-menu de gestão de backups
         MenuBackup(self, self.selecaoBD, self.bd, self.acederItemsBD)
+        
+    def pesquisarItem(self):
+        if self.bd is None:
+            return
+
+        #Obter termo de pesquisa do texto introduzido na barra
+        termo = self.barraPesquisa.get().strip()
+        print(f"Searching for: '{termo}'") 
+        
+        #Se não houver texto na barra, mostrar a lista normal
+        if not termo:
+            self.acederItemsBD()
+            return
+
+        #Eliminar tudo na lista que não corresponde ao termo
+        try:
+            resultados = self.bd.pesquisarItemNome(termo)
+            print(f"Results: {resultados}")
+            self.listaItems.delete(0, tk.END)
+
+            if not resultados:
+                self.listaItems.insert(tk.END, "Nenhum resultado encontrado.")
+            else:
+                for itemID, titulo in resultados:
+                    self.listaItems.insert(tk.END, f"{itemID}: {titulo}")
+        except Exception as e:
+            messagebox.showerror(f"Erro: {e}", f"Não é possível mostrar resultados.")
 
 def configurarJanela(self, larguraJanela: int, alturaJanela: int):
+    #Fazer com que a janela apareça no centro do ecra com um tamanho fixo
     self.resizable(False, False)
     larguraEcra = self.winfo_screenwidth()
     alturaEcra = self.winfo_screenheight()
