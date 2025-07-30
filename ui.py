@@ -9,14 +9,7 @@ class MenuPrincipal(tk.Tk):
         
         #Janela
         self.title("Projeto UFCD 10790")
-        self.resizable(False, False)
-        larguraEcra = self.winfo_screenwidth()
-        alturaEcra = self.winfo_screenheight()
-        larguraJanela = 800
-        alturaJanela = 400
-        centerX = (larguraEcra - larguraJanela) // 2
-        centerY = (alturaEcra - alturaJanela) // 2
-        self.geometry(f'{larguraJanela}x{alturaJanela}+{centerX}+{centerY}')
+        configurarJanela(self, 800, 400)
         
         #Função de UI do menu principal
         self.uiMenuPrincipal()
@@ -45,7 +38,7 @@ class MenuPrincipal(tk.Tk):
         frameBotoes = tk.Frame(self)
         frameBotoes.grid(row = 1, column = 0, sticky = "n", padx = 1, pady = (10, 0))
 
-        botaoRegistar = tk.Button(frameBotoes, text = "Registar", width = 14, height = 3)
+        botaoRegistar = tk.Button(frameBotoes, text = "Registar", command = self.registarItem, width = 14, height = 3)
         botaoRegistar.pack(anchor = tk.W, padx = 4, pady = 2)
         botaoEditar = tk.Button(frameBotoes, text = "Editar", width = 14, height = 3)
         botaoEditar.pack(anchor = tk.W, padx = 4, pady = 2)
@@ -79,7 +72,7 @@ class MenuPrincipal(tk.Tk):
         
         #Selecionar BD inicial
         self.listaBD.select_set(0)
-        self.selecionarBD(None)
+        self.selecionarBD(None)    
 
     def selecionarBD(self, event):
         #Escolher a base de dados selecionada na lista
@@ -117,7 +110,105 @@ class MenuPrincipal(tk.Tk):
                 self.listaItems.insert(tk.END, f"{itemID}: {nomeItem}")
         
     def registarItem(self):
-        print("Abrir sub-menu para registar novo item.")
+        #UI do sub-menu de registar items
+        menuRegistar = tk.Toplevel(self)
+        menuRegistar.title(f"Projeto UFCD 10790 - {self.selecaoBD} - Registar Item")
+        configurarJanela(menuRegistar, 700, 350)
+        menuRegistar.transient(self)
+        menuRegistar.grab_set()
+        
+        #Campos de entrada de dados
+        camposDados = []
+
+        camposDados.append(("Título", tk.Entry(menuRegistar)))
+        camposDados.append(("Sinopse", tk.Entry(menuRegistar)))
+        camposDados.append(("Gênero", tk.Entry(menuRegistar)))
+        
+        if self.selecaoBD == "jogos":
+            camposDados.append(("Plataforma", tk.Entry(menuRegistar)))
+            camposDados.append(("Estreia (AAAA-MM-DD)", tk.Entry(menuRegistar)))
+            camposDados.append(("Tempo Jogado (h)", tk.Entry(menuRegistar)))
+            camposDados.append(("Rating", tk.Entry(menuRegistar)))
+        elif self.selecaoBD == "filmes":
+            camposDados.append(("Realizador", tk.Entry(menuRegistar)))
+            camposDados.append(("Estreia (AAAA-MM-DD)", tk.Entry(menuRegistar)))
+            camposDados.append(("Duração (HH:MM)", tk.Entry(menuRegistar)))
+            camposDados.append(("Rating", tk.Entry(menuRegistar)))
+        elif self.selecaoBD == "series":
+            camposDados.append(("Estreia (AAAA-MM-DD)", tk.Entry(menuRegistar)))
+            camposDados.append(("Temporadas", tk.Entry(menuRegistar)))
+            camposDados.append(("Episódios", tk.Entry(menuRegistar)))
+            camposDados.append(("Rating", tk.Entry(menuRegistar)))
+            
+        entradas = {}
+        
+        for textoCampo, entradaDados in camposDados:
+            tk.Label(menuRegistar, text = textoCampo).pack()
+            entradaDados.pack()
+            entradas[textoCampo] = entradaDados
+            
+        #Guardar os dados inseridos
+        def guardarDados():
+            #Obter os dados de todos os campos para inserir na base de dados
+            dados = {}
+            for nomeCampo, camposDados in entradas.items():
+                dados[nomeCampo] = camposDados.get()
+                
+            try:
+                if self.selecaoBD == "jogos":
+                    self.bd.cursor.execute("""
+                        INSERT INTO items (titulo, sinopse, genero, plataforma, estreia, tempo_jogado, rating)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        dados["Título"],
+                        dados["Sinopse"],
+                        dados["Gênero"],
+                        dados["Plataforma"],
+                        dados["Estreia (AAAA-MM-DD)"],
+                        float(dados["Tempo Jogado (h)"]),
+                        float(dados["Rating"]),
+                    ))
+                elif self.selecaoBD == "filmes":
+                    self.bd.cursor.execute("""
+                        INSERT INTO items (titulo, sinopse, genero, realizador, estreia, duracao, rating)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        dados["Título"],
+                        dados["Sinopse"],
+                        dados["Gênero"],
+                        dados["Realizador"],
+                        dados["Estreia (AAAA-MM-DD)"],
+                        dados["Duração (HH:MM)"],
+                        float(dados["Rating"]),
+                    ))
+                elif self.selecaoBD == "series":
+                    self.bd.cursor.execute("""
+                        INSERT INTO items (titulo, sinopse, genero, estreia, temporadas, episodios, rating)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        dados["Título"],
+                        dados["Sinopse"],
+                        dados["Gênero"],
+                        dados["Estreia (AAAA-MM-DD)"],
+                        int(dados["Temporadas"]),
+                        int(dados["Episódios"]),
+                        float(dados["Rating"]),
+                    ))
+                
+                self.bd.ligacao.commit()
+                print("O item foi registado.")
+                
+                #Fechar o sub-menu e atualizar a lista de items
+                menuRegistar.destroy()
+                self.acederItemsBD()
+            except Exception as e:
+                print(f"Não foi possível guardar os dados. Erro: {e}")
+
+        #UI Botões Sub-Menu Registar
+        botaoGuardar = tk.Button(menuRegistar, text = "Guardar", command = guardarDados)
+        botaoGuardar.pack(pady=10)
+        botaoCancelar = tk.Button(menuRegistar, text = "Cancelar", command = menuRegistar.destroy)
+        botaoCancelar.pack()
 
     def editarItem(self):
         print("Abrir sub-menu para editar item selecionado.")
@@ -130,4 +221,11 @@ class MenuPrincipal(tk.Tk):
 
     def criarBackup(self):
         print("Criar cópia de segurança da base de dados atual.")
-        
+
+def configurarJanela(self, larguraJanela: int, alturaJanela: int):
+    self.resizable(False, False)
+    larguraEcra = self.winfo_screenwidth()
+    alturaEcra = self.winfo_screenheight()
+    centerX = (larguraEcra - larguraJanela) // 2
+    centerY = (alturaEcra - alturaJanela) // 2
+    self.geometry(f'{larguraJanela}x{alturaJanela}+{centerX}+{centerY}')
